@@ -270,9 +270,11 @@ function App() {
                     type="number"
                     min={60}
                     descriptiveText="Minimum 60 seconds"
-                    key={`${item.device_id}-${(item.shadow_reported as { sendInterval?: number } | null)?.sendInterval ?? ""}`}
+                    key={`${item.device_id}-${(item.shadow_desired as { sendInterval?: number } | null)?.sendInterval ?? ""}-${(item.shadow_reported as { sendInterval?: number } | null)?.sendInterval ?? ""}`}
                     defaultValue={
-                      ((item.shadow_reported as { sendInterval?: number } | null)?.sendInterval ?? 0) / 1000 || ""
+                      ((item.shadow_desired as { sendInterval?: number } | null)?.sendInterval
+                        ?? (item.shadow_reported as { sendInterval?: number } | null)?.sendInterval
+                        ?? 0) / 1000 || ""
                     }
                     onBlur={(e) => {
                       const sendInterval = Number(e.target.value);
