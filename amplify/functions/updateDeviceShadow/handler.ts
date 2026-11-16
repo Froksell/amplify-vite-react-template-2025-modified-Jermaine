@@ -13,6 +13,11 @@ const client = generateClient<Schema>({ authMode: 'iam' });
 
 export const handler: Schema['UpdateDeviceShadow']['functionHandler'] = async (event) => {
   const { device_id, sendInterval } = event.arguments;
+
+  if (sendInterval < 60) {
+    throw new Error('sendInterval must be at least 60 seconds');
+  }
+
   const userId = event.identity && 'sub' in event.identity ? event.identity.sub : undefined;
 
   const { data: device, errors } = await client.models.Devices.get({ device_id });
@@ -20,6 +25,11 @@ export const handler: Schema['UpdateDeviceShadow']['functionHandler'] = async (e
   if (errors || !device?.owner || device.owner !== userId) {
     throw new Error('Not the owner');
   }
+
+  if (device.device_type !== 'esp32') {
+    throw new Error('sendInterval can only be set for an ESP32');
+  }
+
 
   const endpoint = await new IoTClient({}).send(
     new DescribeEndpointCommand({ endpointType: 'iot:Data-ATS' }),
@@ -31,7 +41,7 @@ export const handler: Schema['UpdateDeviceShadow']['functionHandler'] = async (e
   await iotData.send(new UpdateThingShadowCommand({
     thingName: device_id,
     payload: Buffer.from(JSON.stringify({
-      state: { desired: { sendInterval } },
+      state: { desired: { sendInterval: sendInterval * 1000 } },
     })),
   }));
 

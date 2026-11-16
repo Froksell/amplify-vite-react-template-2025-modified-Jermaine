@@ -263,26 +263,34 @@ function App() {
                   })
                 }
               />
-              <TextField
-                label="Send interval"
-                type="number"
-                key={`${item.device_id}-${(item.shadow_reported as { sendInterval?: number } | null)?.sendInterval ?? ""}`}
-                defaultValue={(item.shadow_reported as { sendInterval?: number } | null)?.sendInterval ?? ""}
-                onBlur={(e) => {
-                  const sendInterval = Number(e.target.value);
-                  if (!Number.isInteger(sendInterval)) return;
-                  client.mutations.UpdateDeviceShadow({
-                    device_id: item.device_id,
-                    sendInterval,
-                  });
-                }}
-              />
-              {(item.shadow_desired as { sendInterval?: number } | null)?.sendInterval !==
-                (item.shadow_reported as { sendInterval?: number } | null)?.sendInterval && (
-                  <div>
-                    Pending: {(item.shadow_desired as { sendInterval?: number } | null)?.sendInterval}
-                  </div>
-                )}
+              {item.device_type === "esp32" && (
+                <>
+                  <TextField
+                    label="Send interval"
+                    type="number"
+                    min={60}
+                    descriptiveText="Minimum 60 seconds"
+                    key={`${item.device_id}-${(item.shadow_reported as { sendInterval?: number } | null)?.sendInterval ?? ""}`}
+                    defaultValue={
+                      ((item.shadow_reported as { sendInterval?: number } | null)?.sendInterval ?? 0) / 1000 || ""
+                    }
+                    onBlur={(e) => {
+                      const sendInterval = Number(e.target.value);
+                      if (!Number.isInteger(sendInterval) || sendInterval < 60) return;
+                      client.mutations.UpdateDeviceShadow({
+                        device_id: item.device_id,
+                        sendInterval,
+                      });
+                    }}
+                  />
+                  {(item.shadow_desired as { sendInterval?: number } | null)?.sendInterval !==
+                    (item.shadow_reported as { sendInterval?: number } | null)?.sendInterval && (
+                      <div>
+                        Pending: {((item.shadow_desired as { sendInterval?: number } | null)?.sendInterval ?? 0) / 1000} seconds
+                      </div>
+                    )}
+                </>
+              )}
               <br />
               <Button variation="destructive" isFullWidth onClick={() => deleteDevice(item.device_id)}>
                 Delete
