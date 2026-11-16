@@ -45,5 +45,15 @@ export const handler: Schema['UpdateDeviceShadow']['functionHandler'] = async (e
     })),
   }));
 
+  const currentDesired =
+    device.shadow_desired && typeof device.shadow_desired === 'object'
+      ? device.shadow_desired as Record<string, unknown>
+      : {};
+
+  await client.models.Devices.update({
+    device_id,
+    shadow_desired: { ...currentDesired, sendInterval: sendInterval * 1000 },
+  });
+
   return 'ok';
 };

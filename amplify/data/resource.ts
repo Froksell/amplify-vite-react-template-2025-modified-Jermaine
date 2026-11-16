@@ -61,7 +61,7 @@ const schema = a.schema({
   allow.resource(graphqlIoTCoreTelemetry).to(['query', 'mutate']),
   allow.resource(graphqlIoTCoreStatus).to(['query', 'mutate']),
   allow.resource(pollSmhi).to(['query', 'mutate']),
-  allow.resource(updateDeviceShadow).to(['query']),
+  allow.resource(updateDeviceShadow).to(['query', 'mutate']),
   allow.resource(storeDeviceShadow).to(['query', 'mutate'])
 ]);
 
