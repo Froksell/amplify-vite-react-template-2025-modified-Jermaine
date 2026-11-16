@@ -21,7 +21,8 @@ const schema = a.schema({
       device_type: a.string().required(),
       status: a.string(),
       webhook_url: a.string(),
-      webhook_enabled: a.boolean(),
+      webhook_telemetry_enabled: a.boolean(),
+      webhook_status_enabled: a.boolean(),
       shadow_desired: a.json(),
       shadow_reported: a.json(),
     })
