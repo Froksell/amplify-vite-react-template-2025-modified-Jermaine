@@ -24,8 +24,8 @@ export const handler: Handler = async (event) => {
 
     const { errors: updateErrors } = await client.models.Devices.update({
         device_id: event.device_id,
-        shadow_desired: event.shadow_desired ?? {},
-        shadow_reported: event.shadow_reported ?? {},
+        shadow_desired: JSON.stringify(event.shadow_desired ?? {}),
+        shadow_reported: JSON.stringify(event.shadow_reported ?? {}),
     });
 
     if (updateErrors) {

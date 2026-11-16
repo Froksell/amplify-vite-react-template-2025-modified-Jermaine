@@ -44,14 +44,19 @@ export const handler: Schema['UpdateDeviceShadow']['functionHandler'] = async (e
     })),
   }));
 
+  const raw = device.shadow_desired;
+  const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
   const currentDesired =
-    device.shadow_desired && typeof device.shadow_desired === 'object'
-      ? device.shadow_desired as Record<string, unknown>
+    parsed && typeof parsed === 'object'
+      ? parsed as Record<string, unknown>
       : {};
 
   const { errors: updateErrors } = await client.models.Devices.update({
     device_id,
-    shadow_desired: { ...currentDesired, sendInterval: sendInterval * 1000 },
+    shadow_desired: JSON.stringify({
+      ...currentDesired,
+      sendInterval: sendInterval * 1000,
+    }),
   });
 
   if (updateErrors) {
