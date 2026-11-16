@@ -21,14 +21,9 @@ const schema = a.schema({
       device_type: a.string().required(),
       status: a.string(),
       webhook_url: a.string(),
-<<<<<<< HEAD
-      webhook_telemetry_enabled: a.boolean(),
-      webhook_status_enabled: a.boolean()
-=======
       webhook_enabled: a.boolean(),
       shadow_desired: a.json(),
       shadow_reported: a.json(),
->>>>>>> 9e5023f (tests with shadow)
     })
     .identifier(['device_id'])
     .authorization((allow) => [
