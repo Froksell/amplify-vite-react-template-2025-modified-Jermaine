@@ -30,7 +30,6 @@ export const handler: Schema['UpdateDeviceShadow']['functionHandler'] = async (e
     throw new Error('sendInterval can only be set for an ESP32');
   }
 
-
   const endpoint = await new IoTClient({}).send(
     new DescribeEndpointCommand({ endpointType: 'iot:Data-ATS' }),
   );
@@ -50,10 +49,14 @@ export const handler: Schema['UpdateDeviceShadow']['functionHandler'] = async (e
       ? device.shadow_desired as Record<string, unknown>
       : {};
 
-  await client.models.Devices.update({
+  const { errors: updateErrors } = await client.models.Devices.update({
     device_id,
     shadow_desired: { ...currentDesired, sendInterval: sendInterval * 1000 },
   });
+
+  if (updateErrors) {
+    throw new Error(updateErrors[0].message);
+  }
 
   return 'ok';
 };
