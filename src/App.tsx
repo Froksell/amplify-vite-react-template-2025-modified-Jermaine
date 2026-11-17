@@ -43,6 +43,15 @@ ChartJS.register(
 
 const client = generateClient<Schema>();
 
+function readShadow(value: unknown): { sendInterval?: number } {
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    return parsed && typeof parsed === "object" ? parsed as { sendInterval?: number } : {};
+  } catch {
+    return {};
+  }
+}
+
 function App() {
 
   const { user, signOut } = useAuthenticator();
@@ -211,7 +220,10 @@ function App() {
         gap="20px"
         wrap="nowrap"
       >
-        {(item, index) => (
+        {(item, index) => {
+          const desired = readShadow(item.shadow_desired).sendInterval;
+          const reported = readShadow(item.shadow_reported).sendInterval;
+          return (
           <Card
             key={index}
             borderRadius="medium"
@@ -270,12 +282,8 @@ function App() {
                     type="number"
                     min={60}
                     descriptiveText="Minimum 60 seconds"
-                    key={`${item.device_id}-${(item.shadow_desired as { sendInterval?: number } | null)?.sendInterval ?? ""}-${(item.shadow_reported as { sendInterval?: number } | null)?.sendInterval ?? ""}`}
-                    defaultValue={
-                      ((item.shadow_desired as { sendInterval?: number } | null)?.sendInterval
-                        ?? (item.shadow_reported as { sendInterval?: number } | null)?.sendInterval
-                        ?? 0) / 1000 || ""
-                    }
+                    key={`${item.device_id}-${desired ?? ""}-${reported ?? ""}`}
+                    defaultValue={desired != null ? String(desired / 1000) : reported != null ? String(reported / 1000) : ""}
                     onBlur={(e) => {
                       const sendInterval = Number(e.target.value);
                       if (!Number.isInteger(sendInterval) || sendInterval < 60) return;
@@ -285,12 +293,9 @@ function App() {
                       });
                     }}
                   />
-                  {(item.shadow_desired as { sendInterval?: number } | null)?.sendInterval !==
-                    (item.shadow_reported as { sendInterval?: number } | null)?.sendInterval && (
-                      <div>
-                        Pending: {((item.shadow_desired as { sendInterval?: number } | null)?.sendInterval ?? 0) / 1000} seconds
-                      </div>
-                    )}
+                  {desired !== reported && (
+                    <div>Pending: {(desired ?? 0) / 1000} seconds</div>
+                  )}
                 </>
               )}
               <br />
@@ -299,7 +304,8 @@ function App() {
               </Button>
             </View>
           </Card>
-        )}
+          );
+        }}
       </Collection>
 
       <Divider padding="xs" />
